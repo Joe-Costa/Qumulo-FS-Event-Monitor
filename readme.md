@@ -6,17 +6,17 @@ Conversations with Scott U. indicate that it is likely less impactful to simply 
 
 The workflow would consist of:
 
-`cn_monitor.py` which initiates a Change Notify API subscription and listens for events
+- `cn_monitor.py` which initiates a Change Notify API subscription and listens for events
 
-A Redis queue to hold events
+- A Redis queue to hold events. 
 
-`event_filter.py` which subscribes to the queue filters events based on a user-supplied criteria stored in a config file (Maybe bundle cn_monitor and event_filter as one script?).  Event Filter should ideally have AND/OR condition matching logic
+- `event_filter.py` which subscribes to the queue filters events based on a user-supplied criteria stored in a config file (Maybe bundle cn_monitor and event_filter as one script?).  
 
-`watched_items.conf`  A file containing a list of watched directories or files and the actions to take when matched
+- `watched_items.conf`  A file containing a list of watched directories or files and the actions to take when matched
 
-`action_modules.conf` A file containing a list of modules to perform specific actions based on trigger events.  This could also be a directory
+- `action_modules.conf` A file containing a list of modules to perform specific actions based on trigger events.  This could also be a directory
 
-A Docker or Kubernetes deployment to run all of the above.
+- A Docker or Kubernetes deployment to run all of the above.
 
 ## Hypothetical sample workflow:
 
@@ -24,6 +24,10 @@ A Docker or Kubernetes deployment to run all of the above.
 2. Changes are pushed into a queue (Redis, most likely)
 3. `event_filter.py` subscribes to the Redis queue and filters for matches in `watched_items.conf`
 4. Matches then trigger the appropriate Action Module.
+
+Notes:
+
+The Event Filter should ideally have AND/OR condition matching logic and should also allow the application of changes to the `watched_items.conf` file without stopping `cn_monitor.py` or losing events.
 
 ## Sample Action Modules:
 
