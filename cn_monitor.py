@@ -13,9 +13,8 @@ config = configparser.ConfigParser()
 config.read("cn_monitor.conf")
 CLUSTER_ADDRESS = config["CLUSTER"]["CLUSTER_ADDRESS"]
 TOKEN = config["CLUSTER"]["TOKEN"]
-# CONFIG_SAVE_FILE_LOCATION = os.path.join(os.getcwd(), '')
 USE_SSL = config["CLUSTER"].getboolean('USE_SSL')
-# WATCH_DIR = "/changes"
+
 
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
@@ -24,13 +23,9 @@ HEADERS = {
 }
 
 API_URL = "https://" + CLUSTER_ADDRESS + "/api/v1/files/{}"
-# API_URL = "https://qq.qumulotest.local/api/v1/files/{}"
-# REF_PATH = "%2Fchanges/notify?recursive=true"
 REF_PATH = "%2F/notify?recursive=true"
 API_ENDPOINT = API_URL.format(REF_PATH)
 
-
-# 2ND VERSION
 # Do something with the data received from the CN watcher
 async def handle_event(event_data):
     try:
