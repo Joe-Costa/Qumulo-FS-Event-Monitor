@@ -10,7 +10,7 @@ The workflow would consist of:
 
 A Redis queue to hold events
 
-`event_filter.py` which subscribes to the queue filters events based on a user-supplied criteria stored in a config file (Maybe bundle cn_monitor and event_filter as one script?)
+`event_filter.py` which subscribes to the queue filters events based on a user-supplied criteria stored in a config file (Maybe bundle cn_monitor and event_filter as one script?).  Event Filter should ideally have AND/OR condition matching logic
 
 `watched_items.conf`  A file containing a list of watched directories or files and the actions to take when matched
 
