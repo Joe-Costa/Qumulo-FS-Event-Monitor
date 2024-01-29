@@ -37,3 +37,6 @@ The Event Filter should ideally have AND/OR condition matching logic and should 
 - Change permissions on files in a watched directory
 - Send an email or message if a file or directory has been changed or created (Integrate with Qumulo Email Alerts?)
 
+## Key requirement to solve!
+
+There needs to be a means to prevent any endless loops of Actions being triggered by the result of the Actions themselves showing up in the Monitor output!
