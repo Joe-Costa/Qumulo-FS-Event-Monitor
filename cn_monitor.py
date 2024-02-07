@@ -23,7 +23,13 @@ HEADERS = {
 }
 
 API_URL = "https://" + CLUSTER_ADDRESS + "/api/v1/files/{}"
+
+# Notify on all events:
 REF_PATH = "%2F/notify?recursive=true"
+
+# Sample of filtering and notify on "child_dir_added" and "child_file_added" only:
+# REF_PATH = "%2F/notify?filter=child_dir_added%2Cchild_file_added&recursive=true"
+
 API_ENDPOINT = API_URL.format(REF_PATH)
 
 # Do something with the data received from the CN watcher
@@ -41,7 +47,7 @@ async def monitor_api():
             async with session.get(API_ENDPOINT, headers=HEADERS, ssl=USE_SSL) as response:
                 while True:
                     line = await response.content.readline()
-                    print(f"LINE: {line}")
+                    #print(f"LINE: {line}")
                     if not line:
                         break  # End of stream
                     event_data = line.decode(encoding='UTF-8').strip()
