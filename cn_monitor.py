@@ -37,6 +37,7 @@ async def handle_event(event_data):
     try:
         changes = json.loads(event_data)
         print(f"Event: {changes}")
+    # Catch occasions were non-JSON events are sent by the cluster
     except json.JSONDecodeError:
         print(f"Non-JSON event received: {event_data}")
 
