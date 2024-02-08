@@ -36,7 +36,26 @@ API_ENDPOINT = API_URL.format(REF_PATH)
 async def handle_event(event_data):
     try:
         changes = json.loads(event_data)
-        print(f"Event: {changes}")
+
+        ''' 
+
+        The sample loop below looks for new files being created and prints their names.
+
+        A complete, unfiltered line example would be:
+
+        {'type': 'child_file_added', 'spine': ['2', '10003', '5007655', '1459590167'], 'path': 'home/joe/fff2', 'stream_name': None}
+
+        Note that "changes" could contain multiple such lines per client action driven event
+
+        The goal is to send each event line (Or maybe the entire "changes" blob...) to RabbitMQ or Redis
+
+        '''
+
+        for fs_event in changes:
+            if fs_event['type'] == 'child_file_added':
+                print(f"New file created: {os.path.basename(fs_event['path'])}")
+            else:
+                pass
     # Catch occasions were non-JSON events are sent by the cluster
     except json.JSONDecodeError:
         print(f"Non-JSON event received: {event_data}")
@@ -53,7 +72,7 @@ async def monitor_api():
                         break  # End of stream
                     event_data = line.decode(encoding='UTF-8').strip()
                     if event_data.startswith("data:"):
-                        event_data = event_data[len("data:"):].strip()
+                        event_data = event_data.replace("data:", "").strip()
                         await handle_event(event_data)
     except asyncio.CancelledError:
         print("Monitoring canceled. Cleaning up...")
