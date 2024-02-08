@@ -41,7 +41,7 @@ async def handle_event(event_data):
 
         The sample loop below looks for new files being created and prints their names.
 
-        A complete, unfiltered line example would be:
+        An example complete, unfiltered line example would be:
 
         {'type': 'child_file_added', 'spine': ['2', '10003', '5007655', '1459590167'], 'path': 'home/joe/fff2', 'stream_name': None}
 
