@@ -63,8 +63,8 @@ move_events = {}
 def get_file_key(event):
     return f"{'_'.join(event['spine'])}"
 
+# File locker function
 async def lock_file(path):
-    # Construct the URL for locking the file
     encoded_path = urllib.parse.quote(path, safe='')
     lock_url = "https://" + CLUSTER_ADDRESS + f"/api/v1/files/%2F{encoded_path}/file-lock"
     retention_period = ( datetime.utcnow() + timedelta(seconds=60) ).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -73,7 +73,7 @@ async def lock_file(path):
         "retention_period": str(retention_period),
         "legal_hold": False
     }
-    print(lock_url)
+
     async with aiohttp.ClientSession() as session:
         async with session.patch(lock_url, headers=HEADERS, json=payload, ssl=USE_SSL) as response:
             if response.status == 200:
@@ -84,7 +84,7 @@ async def lock_file(path):
                 print(f"Response: {response_text}")
     # print(f"File {lock_url} has been locked successfully.")
 
-# New function to delay locking the file
+# Function to delay locking the file
 async def lock_file_after_delay(path, delay):
     try:
         await asyncio.sleep(delay)
@@ -92,12 +92,12 @@ async def lock_file_after_delay(path, delay):
     except Exception as e:
         print(f"Error locking file {path} after delay: {e}")
 
-# Modified alert_user function to schedule the lock after 30 seconds
+# Output alerts based on event or run file locker
 async def alert_user(event_type, path, old_path=None):
     match event_type:
         case "child_file_added":
             print(f'New file has been added: {path}')
-            # Schedule the lock_file function to run after 30 seconds
+            # Schedule the lock_file function to run after n seconds
             asyncio.create_task(lock_file_after_delay(path, 5))
         case "child_dir_added":
             print(f'New directory has been added: {path}')
@@ -108,7 +108,7 @@ async def alert_user(event_type, path, old_path=None):
         case _:
             print(f'Unknown event type: {event_type} for path: {path}')
 
-# Do something with the data received from the CN watcher
+# Do something with the data received from the Change Notify watcher
 async def handle_event(event_data):
     try:
         changes = json.loads(event_data)
