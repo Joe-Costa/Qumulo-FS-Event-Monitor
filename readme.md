@@ -1,18 +1,20 @@
 # Qumulo File System Event Monitor
 
+**This is all in beta provided as code sample only**
+
 This project uses the Qumulo Change Notify API to monitor for changes to a watched portion of the file system and triggers the launching of modules in response to specific conditions.
 
 Conversations with Scott U. indicate that it is likely less impactful to simply monitor changes to `/` than to launch multiple watchers.
 
 The workflow would consist of:
 
-- `cn_monitor.py` which initiates a Change Notify API subscription and listens for events
+- `cn_monitor.py` or `event_watcher.py` which initiates a Change Notify API subscription and listens for events
 
 - A Redis queue to hold events. 
 
 - `event_filter.py` which subscribes to the queue filters events based on a user-supplied criteria stored in a config file (Maybe bundle cn_monitor and event_filter as one script?).  
 
-- `watched_items.conf`  A file containing a list of watched directories or files and the actions to take when matched
+- `watched_items.yml`  A file containing a list of watched directories, files or file extensions and the actions to take when matched
 
 - `action_modules.conf` A file containing a list of modules to perform specific actions based on trigger events.  This could also be a directory
 
