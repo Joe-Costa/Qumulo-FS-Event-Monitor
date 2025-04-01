@@ -1,0 +1,10 @@
+PATHS:
+  - /home/joe
+  - /home/alice
+  - /home/bob
+
+EXTENSIONS:
+  - .bak
+  - .jpg
+  - .txt
+  - .rtf

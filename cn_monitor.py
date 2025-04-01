@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-import argparse
 import urllib3
 import configparser
 import asyncio
 import aiohttp
 import json
 import os
+import requests
+import json
+from aiohttp import web
+
 
 
 # Load the config file
@@ -14,8 +17,11 @@ config.read("cn_monitor.conf")
 CLUSTER_ADDRESS = config["CLUSTER"]["CLUSTER_ADDRESS"]
 TOKEN = config["CLUSTER"]["TOKEN"]
 USE_SSL = config["CLUSTER"].getboolean('USE_SSL')
-
-
+WATCHED_FOLDERS = ['home/joe/hooks', '/JuanUlloa']
+WEBHOOK_URL = 'https://hooks.slack.com/services/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'
+WEBHOOK_HEADERS = {
+    'Content-type': 'application/json',
+    }
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
     "Accept": "application/json",
@@ -31,6 +37,25 @@ REF_PATH = "%2F/notify?recursive=true"
 # REF_PATH = "%2F/notify?filter=child_dir_added%2Cchild_file_added&recursive=true"
 
 API_ENDPOINT = API_URL.format(REF_PATH)
+
+
+async def webhook_handler(request):
+    data = await request.json()  # Assuming the incoming data is JSON encoded
+    new_path = data.get('text')  # Adjust 'text' to the actual key depending on how the data is sent
+    if new_path:
+        WATCHED_FOLDERS.append(new_path)
+        return web.Response(text=f"Added {new_path} to watched folders", status=200)
+    return web.Response(text="Invalid data", status=400)
+
+async def start_web_server():
+    app = web.Application()
+    app.add_routes([web.post('/webhook', webhook_handler)])  # Listening on /webhook endpoint
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, 'localhost', 5000)  # Listen on localhost:8080, adjust as necessary
+    await site.start()
+    print("Web server started. Listening for incoming webhooks...")
+
 
 # Do something with the data received from the CN watcher
 async def handle_event(event_data):
@@ -52,10 +77,32 @@ async def handle_event(event_data):
         '''
 
         for fs_event in changes:
-            if fs_event['type'] == 'child_file_added':
-                print(f"New file created: {os.path.basename(fs_event['path'])}")
+            print(fs_event['path'])
+            # if fs_event['type'] == 'child_file_added':
+            #     # print(f"New file created: {os.path.basename(fs_event['path'])}")
+            #     print(f"New file created: {fs_event['path']}")
+
+            # else:
+            #     pass
+            # if WATCHED_FOLDERS in fs_event['path']:
+            if any(folder in '/' + fs_event['path'] for folder in WATCHED_FOLDERS):
+                event_folder = os.path.dirname(fs_event['path'])
+                # print(f"File {os.path.basename(fs_event['path'])} created in {WATCHED_FOLDER}")
+                # print(f"New file created in : {fs_event['path']}")
+                # if fs_event['type'] == 'child_dir_added':
+                #     file_id = fs_event['spine'][-1]
+                path = os.path.basename(fs_event['path'])
+                if fs_event['type'] == 'child_file_removed' or fs_event['type'] == 'child_dir_removed':
+                    event = json.dumps({"text": f"Object {path} deleted from {event_folder}"})
+                    response = requests.post(WEBHOOK_URL, headers=WEBHOOK_HEADERS, data=event)
+                elif fs_event['type'] == 'child_file_added' or fs_event['type'] == 'child_dir_added':
+                    event = json.dumps({"text": f"Object {path} created in {event_folder}"})
+                    response = requests.post(WEBHOOK_URL, headers=WEBHOOK_HEADERS, data=event)
+
+                else:
+                    pass
             else:
-                pass
+                pass            
     # Catch occasions were non-JSON events are sent by the cluster
     except json.JSONDecodeError:
         print(f"Non-JSON event received: {event_data}")
@@ -84,6 +131,11 @@ async def main():
         except KeyboardInterrupt:
             print("Quitting...")
             break
+# async def main():
+#     webhook_server = start_web_server()
+#     api_monitor = monitor_api()
+#     await asyncio.gather(webhook_server, api_monitor)  # Run both the webhook listener and API monitor concurrently
+
 
 if __name__ == "__main__":
     if not USE_SSL:

@@ -1,3 +1,4 @@
+child_file_added
 child_dir_added
 child_file_removed
 child_dir_removed
