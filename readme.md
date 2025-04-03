@@ -1,6 +1,6 @@
 # Qumulo File System Event Monitor
 
-**This is all in beta provided as code sample only**
+**This is all in beta provided as code samples only**
 
 This project uses the Qumulo Change Notify API to monitor for changes to a watched portion of the file system and triggers the launching of modules in response to specific conditions.
 
@@ -41,4 +41,4 @@ The Event Filter should ideally have AND/OR condition matching logic and should 
 
 ## Key requirement to solve!
 
-There needs to be a means to prevent any endless loops of Actions being triggered by the result of the Actions themselves showing up in the Monitor output!
+We need to be mindful to include logic to prevent any endless loops of Actions being triggered by the result of the Actions themselves showing up in the Monitor output!
